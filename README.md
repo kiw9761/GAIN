@@ -1,4 +1,6 @@
-# Codebase for "Generative Adversarial Imputation Networks (GAIN)"
+# Originally Codebase for "Generative Adversarial Imputation Networks (GAIN)"
+
+Fork from: Jinsung Yoon(jsyoon0823)
 
 Authors: Jinsung Yoon, James Jordon, Mihaela van der Schaar
 
@@ -8,23 +10,17 @@ International Conference on Machine Learning (ICML), 2018.
  
 Paper Link: http://proceedings.mlr.press/v80/yoon18a/yoon18a.pdf
 
-Contact: jsyoon0823@gmail.com
+Place yours dataset in "data" folder.
 
-This directory contains implementations of GAIN framework for imputation
-using two UCI datasets.
-
--   UCI Letter (https://archive.ics.uci.edu/ml/datasets/Letter+Recognition)
--   UCI Spam (https://archive.ics.uci.edu/ml/datasets/Spambase)
-
-To run the pipeline for training and evaluation on GAIN framwork, simply run 
-python3 -m main_letter_spam.py.
+To run the pipeline for training on GAIN framwork, simply run 
+python3 -m main.py --data_name dataset.
 
 Note that any model architecture can be used as the generator and 
 discriminator model such as multi-layer perceptrons or CNNs. 
 
 ### Command inputs:
 
--   data_name: letter or spam
+-   data_name: filename of dataset (don't include format)
 -   miss_rate: probability of missing components
 -   batch_size: batch size
 -   hint_rate: hint rate
@@ -34,7 +30,7 @@ discriminator model such as multi-layer perceptrons or CNNs.
 ### Example command
 
 ```shell
-$ python3 main_letter_spam.py --data_name spam 
+$ python3 main.py --data_name dataset
 --miss_rate: 0.2 --batch_size 128 --hint_rate 0.9 --alpha 100
 --iterations 10000
 ```
@@ -42,4 +38,3 @@ $ python3 main_letter_spam.py --data_name spam
 ### Outputs
 
 -   imputed_data_x: imputed data
--   rmse: Root Mean Squared Error
