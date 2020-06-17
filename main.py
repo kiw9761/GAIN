@@ -35,6 +35,7 @@ def main (args):
     - alpha: hyperparameter
     - iterations: iterations
     - onehot: the number of feature for onehot encoder (start from first feature)
+    - predict: option for prediction mode, no ramdom mask and save model if on
     
   Returns:
     - imputed_data_x: imputed data
@@ -47,10 +48,11 @@ def main (args):
                      'hint_rate': args.hint_rate,
                      'alpha': args.alpha,
                      'iterations': args.iterations,
-                     'onehot': args.onehot}
+                     'onehot': args.onehot,
+                     'predict': args.predict}
   
   # Load data and introduce missingness
-  ori_data_x, miss_data_x, data_m, feature_name, onehotencoder, ori_data_dim = data_loader(data_name, miss_rate, args.onehot)
+  ori_data_x, miss_data_x, data_m, feature_name, onehotencoder, ori_data_dim = data_loader(data_name, miss_rate, args.onehot, args.predict)
   
   # Impute missing data
   imputed_data_x = gain(miss_data_x, feature_name, onehotencoder, ori_data_dim, gain_parameters)
@@ -98,6 +100,12 @@ if __name__ == '__main__':
       help='number of onehot encoding columns',
       default=0,
       type=int)
+  parser.add_argument(
+      '--predict',
+      help='prediction Mode',
+      const=True,
+      default=False,
+      type=str2bool)
   
   args = parser.parse_args()
   

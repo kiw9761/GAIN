@@ -9,13 +9,14 @@ from utils import binary_sampler
 
 
 
-def data_loader (data_name, miss_rate, onehot):
+def data_loader (data_name, miss_rate, onehot, predict):
   '''Loads datasets and introduce missingness.
   
   Args:
     - data_name: the filename of dataset
     - miss_rate: the probability of missing components
     - onehot: the number of feature for onehot encoder (start from first feature)
+    - predict: the option of prediction mode
     
   Returns:
     data_x: original data
@@ -50,7 +51,10 @@ def data_loader (data_name, miss_rate, onehot):
   no, dim = data_x.shape
   
   # Introduce missing data
-  data_m = binary_sampler(1-miss_rate, no, dim)
+  if predict is False:
+    data_m = binary_sampler(1-miss_rate, no, dim)
+  else:
+    data_m = 1-np.isnan(data_x)
   miss_data_x = data_x.copy()
   miss_data_x[data_m == 0] = np.nan
       

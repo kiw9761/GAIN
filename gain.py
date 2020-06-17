@@ -10,6 +10,7 @@ Contact: jsyoon0823@gmail.com
 import tensorflow as tf
 import numpy as np
 from tqdm import tqdm
+import os
 
 from utils import normalization, renormalization, rounding, reverse_encoding
 from utils import xavier_init
@@ -25,11 +26,13 @@ def gain (data_x, feature_name, onehotencoder, ori_data_dim, gain_parameters):
     - onehotencoder: onehotencoder of this data
     - ori_data_dim: dimensions of original data    
     - gain_parameters: GAIN network parameters:
+      - data_name: the file name of dataset
       - batch_size: Batch size
       - hint_rate: Hint rate
       - alpha: Hyperparameter
       - iterations: Iterations
       - onehot: the number of feature for onehot encoder (start from first feature)
+      - predict: option for prediction mode
       
   Returns:
     - imputed_data: imputed data
@@ -38,11 +41,16 @@ def gain (data_x, feature_name, onehotencoder, ori_data_dim, gain_parameters):
   data_m = 1-np.isnan(data_x)
   
   # System parameters
+  data_name = gain_parameters['data_name']
   batch_size = gain_parameters['batch_size']
   hint_rate = gain_parameters['hint_rate']
   alpha = gain_parameters['alpha']
   iterations = gain_parameters['iterations']
   onehot = gain_parameters['onehot']
+  predict = gain_parameters['predict']
+
+  # Model Path
+  model_path = 'model/'+ data_name
   
   # Other parameters
   no, dim = data_x.shape
@@ -57,34 +65,34 @@ def gain (data_x, feature_name, onehotencoder, ori_data_dim, gain_parameters):
   ## GAIN architecture   
   # Input placeholders
   # Data vector q 
-  X = tf.placeholder(tf.float32, shape = [None, dim])
+  X = tf.placeholder(tf.float32, shape = [None, dim], name='X')
   # Mask vector 
-  M = tf.placeholder(tf.float32, shape = [None, dim])
+  M = tf.placeholder(tf.float32, shape = [None, dim], name='M')
   # Hint vector
-  H = tf.placeholder(tf.float32, shape = [None, dim])
+  H = tf.placeholder(tf.float32, shape = [None, dim], name='H')
   
   # Discriminator variables
-  D_W1 = tf.Variable(xavier_init([dim*2, h_dim])) # Data + Hint as inputs
-  D_b1 = tf.Variable(tf.zeros(shape = [h_dim]))
+  D_W1 = tf.Variable(xavier_init([dim*2, h_dim]), name='D_W1') # Data + Hint as inputs
+  D_b1 = tf.Variable(tf.zeros(shape = [h_dim]), name='D_b1')
   
-  D_W2 = tf.Variable(xavier_init([h_dim, h_dim]))
-  D_b2 = tf.Variable(tf.zeros(shape = [h_dim]))
+  D_W2 = tf.Variable(xavier_init([h_dim, h_dim]), name='D_W2')
+  D_b2 = tf.Variable(tf.zeros(shape = [h_dim]), name='D_b2')
   
-  D_W3 = tf.Variable(xavier_init([h_dim, dim]))
-  D_b3 = tf.Variable(tf.zeros(shape = [dim]))  # Multi-variate outputs
+  D_W3 = tf.Variable(xavier_init([h_dim, dim]), name='D_W3')
+  D_b3 = tf.Variable(tf.zeros(shape = [dim]), name='D_b3')  # Multi-variate outputs
   
   theta_D = [D_W1, D_W2, D_W3, D_b1, D_b2, D_b3]
   
   #Generator variables
   # Data + Mask as inputs (Random noise is in missing components)
-  G_W1 = tf.Variable(xavier_init([dim*2, h_dim]))  
-  G_b1 = tf.Variable(tf.zeros(shape = [h_dim]))
+  G_W1 = tf.Variable(xavier_init([dim*2, h_dim]), name='G_W1')  
+  G_b1 = tf.Variable(tf.zeros(shape = [h_dim]), name='G_b1')
   
-  G_W2 = tf.Variable(xavier_init([h_dim, h_dim]))
-  G_b2 = tf.Variable(tf.zeros(shape = [h_dim]))
+  G_W2 = tf.Variable(xavier_init([h_dim, h_dim]), name='G_W2')
+  G_b2 = tf.Variable(tf.zeros(shape = [h_dim]), name='G_b2')
   
-  G_W3 = tf.Variable(xavier_init([h_dim, dim]))
-  G_b3 = tf.Variable(tf.zeros(shape = [dim]))
+  G_W3 = tf.Variable(xavier_init([h_dim, dim]), name='G_W3')
+  G_b3 = tf.Variable(tf.zeros(shape = [dim]), name='G_b3')
   
   theta_G = [G_W1, G_W2, G_W3, G_b1, G_b2, G_b3]
   
@@ -137,7 +145,12 @@ def gain (data_x, feature_name, onehotencoder, ori_data_dim, gain_parameters):
   
   ## Iterations
   sess = tf.Session()
-  sess.run(tf.global_variables_initializer())
+  saver = tf.train.Saver()
+  if predict is True and os.path.exists(model_path + '.ckpt.meta'):
+    print ("Model Restore")
+    saver.restore(sess, model_path + '.ckpt')
+  else:
+    sess.run(tf.global_variables_initializer())
    
   # Start Iterations
   for it in tqdm(range(iterations)):    
@@ -160,7 +173,9 @@ def gain (data_x, feature_name, onehotencoder, ori_data_dim, gain_parameters):
     _, G_loss_curr, MSE_loss_curr = \
     sess.run([G_solver, G_loss_temp, MSE_loss],
              feed_dict = {X: X_mb, M: M_mb, H: H_mb})
-            
+  if predict is False:
+    save_path = saver.save(sess, model_path + '.ckpt')
+
   ## Return imputed data      
   Z_mb = uniform_sampler(0, 0.01, no, dim) 
   M_mb = data_m
