@@ -56,7 +56,7 @@ def gain (data_x, feature_name, onehotencoder, ori_data_dim, gain_parameters):
   
   ## GAIN architecture   
   # Input placeholders
-  # Data vector
+  # Data vector q 
   X = tf.placeholder(tf.float32, shape = [None, dim])
   # Mask vector 
   M = tf.placeholder(tf.float32, shape = [None, dim])

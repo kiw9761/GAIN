@@ -4,7 +4,7 @@
 # Necessary packages
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder
 from utils import binary_sampler
 
 
@@ -29,6 +29,8 @@ def data_loader (data_name, miss_rate, onehot):
   # Load data
   file_name = 'data/'+data_name+'.csv'
   data = pd.read_csv(file_name)
+  feature_name = list(data.columns)
+  data = np.array(data)
 
   # Onehotencoding, if columns have exist missing value, skip encoding
   onehotencoder = OneHotEncoder()
@@ -42,9 +44,6 @@ def data_loader (data_name, miss_rate, onehot):
   else:
     print("Missing value exist, skip onehotencoding")
     data_x = np.array(data)
-
-  # Save feature name
-  feature_name = list(data.columns)
 
   # Parameters
   ori_data_dim = data.shape[1]
