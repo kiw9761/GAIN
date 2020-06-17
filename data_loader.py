@@ -34,11 +34,11 @@ def data_loader (data_name, miss_rate, onehot):
 
   # Onehotencoding, if columns have exist missing value, skip encoding
   onehotencoder = OneHotEncoder()
-  if data[:,:onehot-1].isnull() == 0 and onehot > 0:
-    data_x = data.iloc[:,:onehot-1]
+  if np.sum(np.isnan(data[:,:onehot])) == 0 and onehot > 0:
+    data_x = data[:,:onehot]
     onehotencoder.fit(data_x)
     data_x = onehotencoder.transform(data_x).toarray()
-    data_x = np.concatenate((data_x, data.iloc[:,onehot-1:].values),axis=1)
+    data_x = np.concatenate((data_x, data[:,onehot:]),axis=1)
   elif onehot == 0:
     data_x = np.array(data)
   else:

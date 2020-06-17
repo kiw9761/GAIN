@@ -192,7 +192,7 @@ def reverse_encoding(imputed_data, feature_name, encoder, onehot, ori_data_dim):
   Returns:
     - imputed_data: imputed data in the original form
   '''
-    encoded_data = imputed_data[:,:(imputed_data.shape[1] - (ori_data_dim - (onehot-1)))]
+    encoded_data = imputed_data[:,:(imputed_data.shape[1] - (ori_data_dim - onehot - 1))]
     inversed_data = encoder.inverse_transform(encoded_data)
-    imputed_data = np.concatenate((inversed_data, imputed_data[:,(imputed_data.shape[1] - (ori_data_dim - 5)):]),axis=1)
+    imputed_data = np.concatenate((inversed_data, imputed_data[:,(imputed_data.shape[1] - (ori_data_dim - onehot - 1)):]),axis=1)
     return imputed_data

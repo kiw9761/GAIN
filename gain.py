@@ -178,6 +178,7 @@ def gain (data_x, feature_name, onehotencoder, ori_data_dim, gain_parameters):
   imputed_data = rounding(imputed_data, data_x)
 
   # Reverse encoding
-  imputed_data = reverse_encoding(imputed_data, feature_name, onehotencoder, onehot, ori_data_dim)
+  if onehot > 0:
+    imputed_data = reverse_encoding(imputed_data, feature_name, onehotencoder, onehot, ori_data_dim)
           
   return imputed_data
