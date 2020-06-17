@@ -11,21 +11,25 @@ import tensorflow as tf
 import numpy as np
 from tqdm import tqdm
 
-from utils import normalization, renormalization, rounding
+from utils import normalization, renormalization, rounding, reverse_encoding
 from utils import xavier_init
 from utils import binary_sampler, uniform_sampler, sample_batch_index
 
 
-def gain (data_x, gain_parameters):
+def gain (data_x, feature_name, onehotencoder, ori_data_dim, gain_parameters):
   '''Impute missing values in data_x
   
   Args:
     - data_x: original data with missing values
+    - feature_name: feature namelist of original data
+    - onehotencoder: onehotencoder of this data
+    - ori_data_dim: dimensions of original data    
     - gain_parameters: GAIN network parameters:
       - batch_size: Batch size
       - hint_rate: Hint rate
       - alpha: Hyperparameter
       - iterations: Iterations
+      - onehot: the number of feature for onehot encoder (start from first feature)
       
   Returns:
     - imputed_data: imputed data
@@ -38,6 +42,7 @@ def gain (data_x, gain_parameters):
   hint_rate = gain_parameters['hint_rate']
   alpha = gain_parameters['alpha']
   iterations = gain_parameters['iterations']
+  onehot = gain_parameters['onehot']
   
   # Other parameters
   no, dim = data_x.shape
@@ -170,6 +175,9 @@ def gain (data_x, gain_parameters):
   imputed_data = renormalization(imputed_data, norm_parameters)  
   
   # Rounding
-  imputed_data = rounding(imputed_data, data_x)  
+  imputed_data = rounding(imputed_data, data_x)
+
+  # Reverse encoding
+  imputed_data = reverse_encoding(imputed_data, feature_name, onehotencoder, onehot, ori_data_dim)
           
   return imputed_data

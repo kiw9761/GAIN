@@ -30,17 +30,13 @@ def data_loader (data_name, miss_rate, onehot):
   file_name = 'data/'+data_name+'.csv'
   data = pd.read_csv(file_name)
 
-  # Check dataset fit the train
-  if data.shape[2] is not None:
-    print("Dataset not 2D")
-
   # Onehotencoding, if columns have exist missing value, skip encoding
   onehotencoder = OneHotEncoder()
   if data[:,:onehot-1].isnull() == 0 and onehot > 0:
     data_x = data.iloc[:,:onehot-1]
     onehotencoder.fit(data_x)
     data_x = onehotencoder.transform(data_x).toarray()
-    data_x = np.concatenate((data_x, data.iloc[:,5:].values),axis=1)
+    data_x = np.concatenate((data_x, data.iloc[:,onehot-1:].values),axis=1)
   elif onehot == 0:
     data_x = np.array(data)
   else:
