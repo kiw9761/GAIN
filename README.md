@@ -27,13 +27,15 @@ discriminator model such as multi-layer perceptrons or CNNs.
 -   alpha: hyperparameter
 -   iterations: iterations
 -   onehot: number of feature for onehot encoder (start from first feature)
+-   predict: option for prediction mode, no ramdom mask and save model if on
+
 
 ### Example command
 
 ```shell
 $ python3 main.py --data_name dataset
 --miss_rate: 0.2 --batch_size 128 --hint_rate 0.9 --alpha 100
---iterations 10000 --onehot 5
+--iterations 10000 --onehot 5 --predict False
 ```
 
 ### Outputs
