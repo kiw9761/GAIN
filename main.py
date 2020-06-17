@@ -44,7 +44,8 @@ def main (args):
   data_name = args.data_name
   miss_rate = args.miss_rate
   
-  gain_parameters = {'batch_size': args.batch_size,
+  gain_parameters = {'data_name': args.data_name,
+                     'batch_size': args.batch_size,
                      'hint_rate': args.hint_rate,
                      'alpha': args.alpha,
                      'iterations': args.iterations,
@@ -102,8 +103,7 @@ if __name__ == '__main__':
       type=int)
   parser.add_argument(
       '--predict',
-      help='prediction Mode',
-      const=True,
+      help='Prediction Mode',
       default=False,
       type=str2bool)
   
