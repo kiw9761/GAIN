@@ -1,4 +1,4 @@
-'''Main function for UCI letter and spam datasets.
+'''Main function for GAIN.
 '''
 
 # Necessary packages
@@ -7,27 +7,37 @@ from __future__ import division
 from __future__ import print_function
 
 import argparse
+import pandas as pd
 import numpy as np
 
 from data_loader import data_loader
 from gain import gain
-from utils import rmse_loss
 
+# Boolean input for stdin
+def str2bool(v):
+    if isinstance(v, bool):
+       return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 def main (args):
-  '''Main function for UCI letter and spam datasets.
+  '''Main function
   
   Args:
-    - data_name: letter or spam
+    - data_name: the file name of dataset
     - miss_rate: probability of missing components
     - batch:size: batch size
     - hint_rate: hint rate
     - alpha: hyperparameter
     - iterations: iterations
+    - onehot: the number of feature for onehot encoder (start from first feature)
     
   Returns:
     - imputed_data_x: imputed data
-    - rmse: Root Mean Squared Error
   '''
   
   data_name = args.data_name
@@ -36,21 +46,19 @@ def main (args):
   gain_parameters = {'batch_size': args.batch_size,
                      'hint_rate': args.hint_rate,
                      'alpha': args.alpha,
-                     'iterations': args.iterations}
+                     'iterations': args.iterations,
+                     'onehot': args.onehot}
   
   # Load data and introduce missingness
-  ori_data_x, miss_data_x, data_m = data_loader(data_name, miss_rate)
+  ori_data_x, miss_data_x, data_m, feature_name, onehotencoder, ori_data_dim = data_loader(data_name, miss_rate, args.onehot)
   
   # Impute missing data
-  imputed_data_x = gain(miss_data_x, gain_parameters)
+  imputed_data_x = gain(miss_data_x, feature_name, onehotencoder, ori_data_dim, gain_parameters)
+
+  # Save imputed data
+  pd.DataFrame(imputed_data_x, columns= feature_name).to_csv ('data_imputed/' + data_name + "_imputed.csv", index = False, header=True)
   
-  # Report the RMSE performance
-  rmse = rmse_loss (ori_data_x, imputed_data_x, data_m)
-  
-  print()
-  print('RMSE Performance: ' + str(np.round(rmse, 4)))
-  
-  return imputed_data_x, rmse
+  return imputed_data_x
 
 if __name__ == '__main__':  
   
@@ -58,8 +66,7 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   parser.add_argument(
       '--data_name',
-      choices=['letter','spam'],
-      default='spam',
+      default='new_data_051',
       type=str)
   parser.add_argument(
       '--miss_rate',
@@ -86,8 +93,13 @@ if __name__ == '__main__':
       help='number of training interations',
       default=10000,
       type=int)
+  parser.add_argument(
+      '--onehot',
+      help='number of onehot encoding columns',
+      default=0,
+      type=int)
   
-  args = parser.parse_args() 
+  args = parser.parse_args()
   
   # Calls main function  
-  imputed_data, rmse = main(args)
+  imputed_data = main(args)

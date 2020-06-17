@@ -8,6 +8,7 @@
 (6) binary_sampler: sample binary random variables
 (7) uniform_sampler: sample uniform random variables
 (8) sample_batch_index: sample random batch index
+(9) reverse_encoding: Recover the data from encoded data
 '''
  
 # Necessary packages
@@ -178,5 +179,20 @@ def sample_batch_index(total, batch_size):
   batch_idx = total_idx[:batch_size]
   return batch_idx
   
-
+def reverse_encoding(imputed_data, feature_name, encoder, onehot, ori_data_dim):
+    '''Reversal data from encoded to the original form.
   
+  Args:
+    - imputed_data: imputed data in the encoded form
+    - feature_name: feature namelist of original data
+    - onehotencoder: encoder of this data
+    - onehot: the number of feature for onehot encoder (start from first feature)
+    - ori_data_dim: dimensions of original data
+    
+  Returns:
+    - imputed_data: imputed data in the original form
+  '''
+    encoded_data = imputed_data[:,:(imputed_data.shape[1] - (ori_data_dim - (onehot-1)))]
+    inversed_data = encoder.inverse_transform(encoded_data)
+    imputed_data = np.concatenate((inversed_data, imputed_data[:,(imputed_data.shape[1] - (ori_data_dim - 5)):]),axis=1)
+    return imputed_data
