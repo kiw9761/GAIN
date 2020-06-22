@@ -34,7 +34,7 @@ discriminator model such as multi-layer perceptrons or CNNs.
 
 ```shell
 $ python3 main.py --data_name dataset
---miss_rate: 0.2 --batch_size 128 --hint_rate 0.9 --alpha 100
+--miss_rate 0.2 --batch_size 128 --hint_rate 0.9 --alpha 100
 --iterations 10000 --onehot 5 --predict False
 ```
 
